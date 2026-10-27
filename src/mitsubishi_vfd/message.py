@@ -52,5 +52,40 @@ class MitsubishiVFDMessage:
         return inst
 
 
+class MitsubishiVFDCommand(MitsubishiVFDMessage):
+    instruction_code: int
+    waiting_time: int | None
+    def __init__(self, inverter_id: int, instruction_code: int, waiting_time: int | None = DEFAULT_WAITING_TIME) -> None:
+        super().__init__(inverter_id, head=ENQ, has_checksum=True)
+        self.instruction_code = instruction_code
+        self.waiting_time = waiting_time
+
+    def content_to_bytes(self):
+        head = super().content_to_bytes()
+        out = head + self.instruction_code.to_bytes(1, "big").hex().upper().encode()
+        if self.waiting_time is not None:
+            out += "{:01X}".format(self.waiting_time).encode()
+        return out
+
+class MitsubishiVFDCommand_WriteData(MitsubishiVFDCommand):
+    data: int
+    def __init__(self, inverter_id: int, instruction_code: int, data: int, waiting_time: int | None = DEFAULT_WAITING_TIME) -> None:
+        super().__init__(inverter_id, instruction_code, waiting_time)
+        self.data = data
+
+class MitsubishiVFDCommand_WriteDataLong(MitsubishiVFDCommand_WriteData):
+    def content_to_bytes(self):
+        header = super().content_to_bytes()
+        return header + self.data.to_bytes(2, "big").hex().upper().encode()
+
+class MitsubishiVFDCommand_WriteDataShort(MitsubishiVFDCommand_WriteData):
+    def content_to_bytes(self):
+        header = super().content_to_bytes()
+        return header + self.data.to_bytes(1, "big").hex().upper().encode()
+
+class MitsubishiVFDCommand_ReadData(MitsubishiVFDCommand):
+    pass
+
+
 class MitsubishiVFDResponse():
     pass
