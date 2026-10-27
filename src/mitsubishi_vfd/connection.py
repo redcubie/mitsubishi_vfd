@@ -1,7 +1,6 @@
 
 from serial import Serial
-from .message import MitsubishiVFDMessage, MitsubishiVFDResponse
-
+from .message import MitsubishiVFDMessage, MitsubishiVFDResponse_Any, parse_MitsubishiVFDResponse
 
 class MitsubishiVFDConnection:
     _ser: Serial
@@ -13,6 +12,15 @@ class MitsubishiVFDConnection:
             raise ValueError()
         self._end_character = end_character
 
-    def send_message(self, msg: MitsubishiVFDMessage) -> MitsubishiVFDResponse:
+    def send_message(self, msg: MitsubishiVFDMessage) -> MitsubishiVFDResponse_Any:
         msg_bytes = msg.to_bytes()
         self._ser.write(msg_bytes+self._end_character)
+
+        if self._end_character is not None:
+            resp_bytes = self._ser.read_until(self._end_character)
+        else:
+            raise NotImplementedError()
+
+        assert resp_bytes.endswith(self._end_character)
+
+        return parse_MitsubishiVFDResponse(resp_bytes.removesuffix(self._end_character))
