@@ -1,0 +1,55 @@
+
+from ..connection import MitsubishiVFDConnection
+from ..message import *
+from ..instructions import *
+
+class MitsubishiVFD_APIConnection:
+    conn: MitsubishiVFDConnection
+    inverter_id: int
+    def __init__(self, conn: MitsubishiVFDConnection, inverter_id: int) -> None:
+        self.conn = conn
+        self.inverter_id = inverter_id
+
+    def set_frequency(self, frequency: float, save_to_eeprom = False):
+        if frequency < 0 or frequency > 400:
+            raise ValueError
+        instruction_code = MitsubishiVFD_InstructionCode.FREQUENCY_SETPOINT_EEPROM_WRITE if save_to_eeprom \
+            else MitsubishiVFD_InstructionCode.FREQUENCY_SETPOINT_RAM_WRITE
+        value = int(frequency * 100)
+
+        msg = MitsubishiVFDCommand_WriteDataLong(self.inverter_id, instruction_code.value, value)
+        return self.conn.send_message(msg)
+    
+    def get_frequency(self, from_eeprom = False) -> float:
+        instruction_code = MitsubishiVFD_InstructionCode.FREQUENCY_SETPOINT_EEPROM_READ if from_eeprom \
+            else MitsubishiVFD_InstructionCode.FREQUENCY_SETPOINT_RAM_READ
+        msg = MitsubishiVFDCommand_ReadData(self.inverter_id, instruction_code.value)
+        res = self.conn.send_message(msg)
+        assert isinstance(res, MitsubishiVFDResponse_DataLong)
+
+        return res.data / 100
+
+
+    def get_current_output_frequency_or_speed(self) -> float:
+        instruction_code = MitsubishiVFD_InstructionCode.MONITOR_OUTPUT_FREQUENCY_SPEED
+        msg = MitsubishiVFDCommand_ReadData(self.inverter_id, instruction_code.value)
+        res = self.conn.send_message(msg)
+        assert isinstance(res, MitsubishiVFDResponse_DataLong)
+
+        return res.data / 100 # assuming frequency
+
+    def get_current_output_current(self) -> float:
+        instruction_code = MitsubishiVFD_InstructionCode.MONITOR_OUTPUT_CURRENT
+        msg = MitsubishiVFDCommand_ReadData(self.inverter_id, instruction_code.value)
+        res = self.conn.send_message(msg)
+        assert isinstance(res, MitsubishiVFDResponse_DataLong)
+
+        return res.data / 100 # assuming inverter <=55kW
+
+    def get_current_output_voltage(self) -> float:
+        instruction_code = MitsubishiVFD_InstructionCode.MONITOR_OUTPUT_VOLTAGE
+        msg = MitsubishiVFDCommand_ReadData(self.inverter_id, instruction_code.value)
+        res = self.conn.send_message(msg)
+        assert isinstance(res, MitsubishiVFDResponse_DataLong)
+
+        return res.data / 10
