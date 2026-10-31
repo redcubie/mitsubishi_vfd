@@ -33,6 +33,18 @@ class MitsubishiVFD_APIConnection:
 
         return res.data / 100
 
+    def set_runmode(self, command: MitsubishiVFD_RunCommand):
+        instruction_code = MitsubishiVFD_InstructionCode.RUN_COMMAND
+        msg = MitsubishiVFDCommand_WriteDataShort(self.inverter_id, instruction_code.value, command.value)
+        res = self.conn.send_message(msg)
+        MitsubishiVFDResponse_raise_for_error(res)
+    
+    def set_runmode_extended(self, command: MitsubishiVFD_RunCommandExtended):
+        instruction_code = MitsubishiVFD_InstructionCode.RUN_COMMAND_EXTENDED
+        msg = MitsubishiVFDCommand_WriteDataLong(self.inverter_id, instruction_code.value, command.value)
+        res = self.conn.send_message(msg)
+        MitsubishiVFDResponse_raise_for_error(res)
+
 
     def get_current_output_frequency_or_speed(self) -> float:
         instruction_code = MitsubishiVFD_InstructionCode.MONITOR_OUTPUT_FREQUENCY_SPEED
