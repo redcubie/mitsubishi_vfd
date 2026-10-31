@@ -68,3 +68,22 @@ class MitsubishiVFD_APIConnection:
         msg = MitsubishiVFDCommand_WriteDataLong(self.inverter_id, instruction_code.value, mode.value)
         res = self.conn.send_message(msg)
         assert isinstance(res, MitsubishiVFDResponse_ACK)
+
+
+    def get_parameter(self, parameter_id: int) -> int:
+        assert 0 <= parameter_id and parameter_id <= 0x63
+
+        instruction_code = parameter_id
+        msg = MitsubishiVFDCommand_ReadData(self.inverter_id, instruction_code)
+        res = self.conn.send_message(msg)
+        assert isinstance(res, MitsubishiVFDResponse_DataLong)
+
+        return res.data
+
+    def set_parameter(self, parameter_id: int, value: int):
+        assert 0 <= parameter_id and parameter_id <= 0x63
+
+        instruction_code = parameter_id | MITSUBISHIVFD_PARAMETER_MASK_WRITE
+        msg = MitsubishiVFDCommand_WriteDataLong(self.inverter_id, instruction_code, value)
+        res = self.conn.send_message(msg)
+        assert isinstance(res, MitsubishiVFDResponse_ACK)
