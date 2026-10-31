@@ -128,7 +128,7 @@ def parse_MitsubishiVFDResponse(data: bytes):
         case START_CHARS.NAK:
             # assuming inverter response
             assert len(data) == 4
-            error_id = data[3]
+            error_id = int(data[3:3+1], 16)
             error_obj = MitsubishiVFDCommError(error_id)
 
             return MitsubishiVFDResponse_NAK(inverter_id, error_obj)
