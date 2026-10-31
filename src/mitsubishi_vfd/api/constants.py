@@ -30,3 +30,7 @@ class MitsubishiVFD_RunCommandExtended(Flag):
     AUTO_RESUME = 1 << 9
     STOP = 1 << 10
     RESET = 1 << 11
+
+
+class MitsubishiVFD_ParameterId(Enum):
+    pass

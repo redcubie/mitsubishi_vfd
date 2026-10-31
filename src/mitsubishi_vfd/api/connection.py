@@ -70,7 +70,12 @@ class MitsubishiVFD_APIConnection:
         assert isinstance(res, MitsubishiVFDResponse_ACK)
 
 
-    def get_parameter(self, parameter_id: int) -> int:
+    def get_parameter(self, parameter_id_obj: MitsubishiVFD_ParameterId | int) -> int:
+        if isinstance(parameter_id_obj, MitsubishiVFD_ParameterId):
+            parameter_id = parameter_id_obj.value
+        else:
+            parameter_id = parameter_id_obj
+
         if parameter_id >= 100 and parameter_id < 300:
             if parameter_id < 230:
                 extension_number = 1
@@ -96,7 +101,12 @@ class MitsubishiVFD_APIConnection:
 
         return res.data
 
-    def set_parameter(self, parameter_id: int, value: int):
+    def set_parameter(self, parameter_id_obj: MitsubishiVFD_ParameterId | int, value: int):
+        if isinstance(parameter_id_obj, MitsubishiVFD_ParameterId):
+            parameter_id = parameter_id_obj.value
+        else:
+            parameter_id = parameter_id_obj
+
         if parameter_id >= 100 and parameter_id < 300:
             if parameter_id < 230:
                 extension_number = 1
