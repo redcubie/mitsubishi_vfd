@@ -20,13 +20,15 @@ class MitsubishiVFD_APIConnection:
         value = int(frequency * 100)
 
         msg = MitsubishiVFDCommand_WriteDataLong(self.inverter_id, instruction_code.value, value)
-        return self.conn.send_message(msg)
-    
+        res = self.conn.send_message(msg)
+        MitsubishiVFDResponse_raise_for_error(res)
+
     def get_frequency(self, from_eeprom = False) -> float:
         instruction_code = MitsubishiVFD_InstructionCode.FREQUENCY_SETPOINT_EEPROM_READ if from_eeprom \
             else MitsubishiVFD_InstructionCode.FREQUENCY_SETPOINT_RAM_READ
         msg = MitsubishiVFDCommand_ReadData(self.inverter_id, instruction_code.value)
         res = self.conn.send_message(msg)
+        MitsubishiVFDResponse_raise_for_error(res)
         assert isinstance(res, MitsubishiVFDResponse_DataLong)
 
         return res.data / 100
@@ -36,6 +38,7 @@ class MitsubishiVFD_APIConnection:
         instruction_code = MitsubishiVFD_InstructionCode.MONITOR_OUTPUT_FREQUENCY_SPEED
         msg = MitsubishiVFDCommand_ReadData(self.inverter_id, instruction_code.value)
         res = self.conn.send_message(msg)
+        MitsubishiVFDResponse_raise_for_error(res)
         assert isinstance(res, MitsubishiVFDResponse_DataLong)
 
         return res.data / 100 # assuming frequency
@@ -44,6 +47,7 @@ class MitsubishiVFD_APIConnection:
         instruction_code = MitsubishiVFD_InstructionCode.MONITOR_OUTPUT_CURRENT
         msg = MitsubishiVFDCommand_ReadData(self.inverter_id, instruction_code.value)
         res = self.conn.send_message(msg)
+        MitsubishiVFDResponse_raise_for_error(res)
         assert isinstance(res, MitsubishiVFDResponse_DataLong)
 
         return res.data / 100 # assuming inverter <=55kW
@@ -60,6 +64,7 @@ class MitsubishiVFD_APIConnection:
         instruction_code = MitsubishiVFD_InstructionCode.OPERATION_MODE_READ
         msg = MitsubishiVFDCommand_ReadData(self.inverter_id, instruction_code.value)
         res = self.conn.send_message(msg)
+        MitsubishiVFDResponse_raise_for_error(res)
         assert isinstance(res, MitsubishiVFDResponse_DataLong)
         return MitsubishiVFD_OperationMode(res.data)
 
@@ -67,7 +72,7 @@ class MitsubishiVFD_APIConnection:
         instruction_code = MitsubishiVFD_InstructionCode.OPERATION_MODE_WRITE
         msg = MitsubishiVFDCommand_WriteDataLong(self.inverter_id, instruction_code.value, mode.value)
         res = self.conn.send_message(msg)
-        assert isinstance(res, MitsubishiVFDResponse_ACK)
+        MitsubishiVFDResponse_raise_for_error(res)
 
 
     def get_parameter(self, parameter_id_obj: MitsubishiVFD_ParameterId | int) -> int:
@@ -90,13 +95,14 @@ class MitsubishiVFD_APIConnection:
         instruction_code = MitsubishiVFD_InstructionCode.PARAMETER_NUMBER_EXTENSION_WRITE
         msg = MitsubishiVFDCommand_WriteDataShort(self.inverter_id, instruction_code.value, extension_number)
         res = self.conn.send_message(msg)
-        assert isinstance(res, MitsubishiVFDResponse_ACK)
+        MitsubishiVFDResponse_raise_for_error(res)
 
         assert 0 <= effective_param_id and effective_param_id <= 0x63
 
         instruction_code = effective_param_id
         msg = MitsubishiVFDCommand_ReadData(self.inverter_id, instruction_code)
         res = self.conn.send_message(msg)
+        MitsubishiVFDResponse_raise_for_error(res)
         assert isinstance(res, MitsubishiVFDResponse_DataLong)
 
         return res.data
@@ -121,11 +127,11 @@ class MitsubishiVFD_APIConnection:
         instruction_code = MitsubishiVFD_InstructionCode.PARAMETER_NUMBER_EXTENSION_WRITE
         msg = MitsubishiVFDCommand_WriteDataShort(self.inverter_id, instruction_code.value, extension_number)
         res = self.conn.send_message(msg)
-        assert isinstance(res, MitsubishiVFDResponse_ACK)
+        MitsubishiVFDResponse_raise_for_error(res)
 
         assert 0 <= effective_param_id and effective_param_id <= 0x63
 
         instruction_code = effective_param_id | MITSUBISHIVFD_PARAMETER_MASK_WRITE
         msg = MitsubishiVFDCommand_WriteDataLong(self.inverter_id, instruction_code, value)
         res = self.conn.send_message(msg)
-        assert isinstance(res, MitsubishiVFDResponse_ACK)
+        MitsubishiVFDResponse_raise_for_error(res)
