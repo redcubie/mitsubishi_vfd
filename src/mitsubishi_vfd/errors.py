@@ -1,4 +1,4 @@
-from .constants import MitsubishiVFDCommError
+from .raw.constants import MitsubishiVFDCommError
 
 class MitsubishiVFD_Communication_BaseError(Exception):
     pass

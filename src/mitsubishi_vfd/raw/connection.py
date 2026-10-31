@@ -4,10 +4,12 @@ from .message import MitsubishiVFDMessage, MitsubishiVFDResponse_Any, parse_Mits
 
 class MitsubishiVFDConnection:
     _ser: Serial
+    _waiting_time: int | None
     _end_character: bytes
 
-    def __init__(self, ser: Serial, end_character=b"\r") -> None:
+    def __init__(self, ser: Serial, waiting_time: int | None = 0, end_character = b"\r") -> None:
         self._ser = ser
+        self._waiting_time = waiting_time
         if end_character not in (b"\r", b"\r\n"):
             raise ValueError()
         self._end_character = end_character

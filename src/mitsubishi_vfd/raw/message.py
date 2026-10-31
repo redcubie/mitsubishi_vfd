@@ -158,7 +158,7 @@ def parse_MitsubishiVFDResponse(data: bytes):
         case _:
             raise ValueError()
 
-from .errors import MitsubishiVFD_Communication_get_error
+from ..errors import MitsubishiVFD_Communication_get_error
 
 def MitsubishiVFDResponse_raise_for_error(resp: MitsubishiVFDResponse):
     if not isinstance(resp, MitsubishiVFDResponse_NAK):

@@ -1,7 +1,7 @@
 
-from ..connection import MitsubishiVFDConnection
-from ..message import *
-from ..instructions import *
+from ..raw.connection import MitsubishiVFDConnection
+from ..raw.message import *
+from ..raw.instructions import MitsubishiVFD_InstructionCode, MITSUBISHIVFD_PARAMETER_MASK_WRITE
 
 from .constants import *
 
