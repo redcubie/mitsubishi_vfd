@@ -3,6 +3,8 @@ from ..connection import MitsubishiVFDConnection
 from ..message import *
 from ..instructions import *
 
+from .constants import *
+
 class MitsubishiVFD_APIConnection:
     conn: MitsubishiVFDConnection
     inverter_id: int
@@ -53,3 +55,16 @@ class MitsubishiVFD_APIConnection:
         assert isinstance(res, MitsubishiVFDResponse_DataLong)
 
         return res.data / 10
+
+    def get_operation_mode(self) -> MitsubishiVFD_OperationMode:
+        instruction_code = MitsubishiVFD_InstructionCode.OPERATION_MODE_READ
+        msg = MitsubishiVFDCommand_ReadData(self.inverter_id, instruction_code.value)
+        res = self.conn.send_message(msg)
+        assert isinstance(res, MitsubishiVFDResponse_DataLong)
+        return MitsubishiVFD_OperationMode(res.data)
+
+    def set_operation_mode(self, mode: MitsubishiVFD_OperationMode):
+        instruction_code = MitsubishiVFD_InstructionCode.OPERATION_MODE_WRITE
+        msg = MitsubishiVFDCommand_WriteDataLong(self.inverter_id, instruction_code.value, mode.value)
+        res = self.conn.send_message(msg)
+        assert isinstance(res, MitsubishiVFDResponse_ACK)
