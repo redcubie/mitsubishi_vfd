@@ -71,9 +71,25 @@ class MitsubishiVFD_APIConnection:
 
 
     def get_parameter(self, parameter_id: int) -> int:
-        assert 0 <= parameter_id and parameter_id <= 0x63
+        if parameter_id >= 100 and parameter_id < 300:
+            if parameter_id < 230:
+                extension_number = 1
+                effective_param_id = parameter_id - 160
+            else:
+                extension_number = 1
+                effective_param_id = parameter_id - 192
+        else:
+            extension_number = parameter_id // 100
+            effective_param_id = parameter_id % 100
 
-        instruction_code = parameter_id
+        instruction_code = MitsubishiVFD_InstructionCode.PARAMETER_NUMBER_EXTENSION_WRITE
+        msg = MitsubishiVFDCommand_WriteDataShort(self.inverter_id, instruction_code.value, extension_number)
+        res = self.conn.send_message(msg)
+        assert isinstance(res, MitsubishiVFDResponse_ACK)
+
+        assert 0 <= effective_param_id and effective_param_id <= 0x63
+
+        instruction_code = effective_param_id
         msg = MitsubishiVFDCommand_ReadData(self.inverter_id, instruction_code)
         res = self.conn.send_message(msg)
         assert isinstance(res, MitsubishiVFDResponse_DataLong)
@@ -81,9 +97,25 @@ class MitsubishiVFD_APIConnection:
         return res.data
 
     def set_parameter(self, parameter_id: int, value: int):
-        assert 0 <= parameter_id and parameter_id <= 0x63
+        if parameter_id >= 100 and parameter_id < 300:
+            if parameter_id < 230:
+                extension_number = 1
+                effective_param_id = parameter_id - 160
+            else:
+                extension_number = 1
+                effective_param_id = parameter_id - 192
+        else:
+            extension_number = parameter_id // 100
+            effective_param_id = parameter_id % 100
 
-        instruction_code = parameter_id | MITSUBISHIVFD_PARAMETER_MASK_WRITE
+        instruction_code = MitsubishiVFD_InstructionCode.PARAMETER_NUMBER_EXTENSION_WRITE
+        msg = MitsubishiVFDCommand_WriteDataShort(self.inverter_id, instruction_code.value, extension_number)
+        res = self.conn.send_message(msg)
+        assert isinstance(res, MitsubishiVFDResponse_ACK)
+
+        assert 0 <= effective_param_id and effective_param_id <= 0x63
+
+        instruction_code = effective_param_id | MITSUBISHIVFD_PARAMETER_MASK_WRITE
         msg = MitsubishiVFDCommand_WriteDataLong(self.inverter_id, instruction_code, value)
         res = self.conn.send_message(msg)
         assert isinstance(res, MitsubishiVFDResponse_ACK)
